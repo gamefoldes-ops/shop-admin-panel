@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="stats">
+    <div class="stat-card">
+        <h3>Total orders</h3>
+        <div class="value">{{ total_orders }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Total revenue</h3>
+        <div class="value">₸{{ '%.0f'|format(total_revenue) }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Products</h3>
+        <div class="value">{{ total_products }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Low stock</h3>
+        <div class="value">{{ low_stock }}</div>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="section-title">Orders</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>User</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Address</th>
+                <th>Update</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order.order_number }}</td>
+                <td>{{ order.user.first_name or 'User' }}</td>
+                <td>₸{{ '%.0f'|format(order.total_price) }}</td>
+                <td><span class="badge">{{ order.status }}</span></td>
+                <td>{{ order.shipping_address or '-' }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('update_order_status', order_id=order.id) }}">
+                        <select name="status">
+                            {% for status in status_choices %}
+                                <option value="{{ status }}" {% if order.status == status %}selected{% endif %}>{{ status }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit">Save</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <div class="section-title">Products</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Update stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category }}</td>
+                <td>₸{{ '%.0f'|format(product.price) }}</td>
+                <td>{{ product.quantity_in_stock }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('update_product_stock', product_id=product.id) }}">
+                        <input type="number" name="quantity_in_stock" value="{{ product.quantity_in_stock }}" min="0" required>
+                        <button type="submit">Save</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
