@@ -1,9 +1,8 @@
 import os
 from datetime import datetime
-from decimal import Decimal
 
 from dotenv import load_dotenv
-from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, Text, create_engine
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 
 load_dotenv()
@@ -33,36 +32,45 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
 class User(Base):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    telegram_id: Mapped[int | None] = mapped_column(Integer, unique=True, nullable=True)
-    username: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    first_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    last_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    telegram_id: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    username: Mapped[str | None] = mapped_column(String, nullable=True)
+    first_name: Mapped[str] = mapped_column(String)
+    last_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    address: Mapped[str | None] = mapped_column(String, nullable=True)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
 
     orders: Mapped[list['Order']] = relationship(back_populates='user')
 
 
 class Product(Base):
-    __tablename__ = 'products'
+    __tablename__ = 'product'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
-    category: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, default=0)
-    quantity_in_stock: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    product_key: Mapped[str | None] = mapped_column(String, nullable=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    category: Mapped[str | None] = mapped_column(String, nullable=True)
+    price: Mapped[float] = mapped_column(Float, default=0)
+    old_price: Mapped[float | None] = mapped_column(Float, nullable=True)
+    quantity_in_stock: Mapped[int] = mapped_column(Integer, default=0)
+    image_url: Mapped[str | None] = mapped_column(String, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
 class Order(Base):
-    __tablename__ = 'orders'
+    __tablename__ = 'order'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    order_number: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
-    user_id: Mapped[int | None] = mapped_column(ForeignKey('users.id'), nullable=True)
-    total_price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, default=0)
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default='pending')
-    shipping_address: Mapped[str | None] = mapped_column(Text, nullable=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+    order_number: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    total_price: Mapped[float] = mapped_column(Float, default=0)
+    status: Mapped[str] = mapped_column(String, default='pending')
+    shipping_address: Mapped[str | None] = mapped_column(String, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user: Mapped[User | None] = relationship(back_populates='orders')

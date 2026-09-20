@@ -29,6 +29,7 @@ http://127.0.0.1:5000
 Create `.env` in the project root or set these in your environment:
 
 ```env
+DATABASE_URL=postgresql://user:password@host:5432/database
 BOT_TOKEN=your_bot_token
 DB_HOST=localhost
 DB_PORT=5432
@@ -40,6 +41,10 @@ ADMIN_WEB_PASSWORD=admin123
 ADMIN_WEB_SECRET=replace_with_random_secret
 ADMIN_WEB_ALLOWED_IPS=127.0.0.1,203.0.113.10
 ```
+
+For Render, set `DATABASE_URL` in the service Environment Variables. Do not use
+`DB_HOST=localhost`: localhost inside Render points to the web service container,
+not to the computer or PostgreSQL container running elsewhere.
 
 The site uses the same PostgreSQL database as the Telegram bot.
 
